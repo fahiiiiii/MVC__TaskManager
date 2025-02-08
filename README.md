@@ -61,14 +61,6 @@ cd MVC__TaskManager
    - Server deployment: Host the files on any web server of your choice
    - Development: Use any local development server
 
-## Project Structure
-```
-task-manager/
-│
-├── index.html          # Application entry point with embedded CSS/JS
-├── README.md          # Documentation
-└── .gitignore        # Git ignore configuration
-```
 
 ## Implementation Details
 
