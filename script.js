@@ -3,84 +3,125 @@
 let taskList;
 const savedTasks = JSON.parse(localStorage.getItem("tasks"));
 if (Array.isArray(savedTasks)) {
-  taskList = savedTasks;
+    taskList = savedTasks;
 } else {
-  taskList = [
-    {
-      taskTitle: "have a football match",
-      dueDate: "2014-07-19",
-      id: "01",
-    },
-    {
-      taskTitle: "have a React class",
-      dueDate: "2014-07-22",
-      id: "02",
-    },
-  ];
+    taskList = [
+        {
+            taskTitle: "Have a football match",
+            dueDate: "2024-02-08",
+            id: "01",
+            completed: false
+        },
+        {
+            taskTitle: "Have a React class",
+            dueDate: "2024-02-09",
+            id: "02",
+            completed: false
+        },
+    ];
 }
+
 function saveDataInLocalStorage() {
-  localStorage.setItem("tasks", JSON.stringify(taskList));
+    localStorage.setItem("tasks", JSON.stringify(taskList));
 }
 
-renderTask();
-
-// Model(cause it is deleting data as well as updating or managing data)
 function filterTask(toBeDeletedTargetId) {
-  taskList = taskList.filter(function (task) {
-    if (toBeDeletedTargetId === task.id) {
-      return false;
-    } else {
-      return true;
-    }
-  });
-  saveDataInLocalStorage();
+    taskList = taskList.filter(function (task) {
+        return toBeDeletedTargetId !== task.id;
+    });
+    saveDataInLocalStorage();
 }
 
-// Controller (cause on clicking the "Delete" button it connects model and view part)
 function deleteTask(event) {
-  let deleteTarget = event.target;
-  let toBeDeletedTargetId = deleteTarget.id;
-  filterTask(toBeDeletedTargetId);
-  renderTask();
+    const deleteTarget = event.target;
+    const toBeDeletedTargetId = deleteTarget.getAttribute('data-task-id');
+    filterTask(toBeDeletedTargetId);
+    renderTask();
 }
 
-// Model(cause it is adding data as well as updating or managing data)
+function toggleComplete(event) {
+    const taskId = event.target.getAttribute('data-task-id');
+    taskList = taskList.map(task => {
+        if (task.id === taskId) {
+            return { ...task, completed: !task.completed };
+        }
+        return task;
+    });
+    saveDataInLocalStorage();
+    renderTask();
+}
+
 function pushTask(newTaskTitleValue, dueDate) {
-  dateAsId = new Date().getTime().toString();
-  taskList.push({
-    taskTitle: newTaskTitleValue,
-    dueDate: dueDate,
-    id: dateAsId,
-  });
-  saveDataInLocalStorage();
-}
-// Controller (cause on clicking the "Add Task"button it connects model and view part)
-function addTask() {
-  let newTaskTitle = document.getElementById("taskName");
-  let newTaskTitleValue = newTaskTitle.value;
-  newTaskTitle.value = "";
-  let datePicker = document.getElementById("dueDate");
-  let dueDate = datePicker.value;
-  datePicker.value = "";
-  pushTask(newTaskTitleValue, dueDate);
-  renderTask();
+    const dateAsId = new Date().getTime().toString();
+    taskList.push({
+        taskTitle: newTaskTitleValue,
+        dueDate: dueDate,
+        id: dateAsId,
+        completed: false
+    });
+    saveDataInLocalStorage();
 }
 
-//View
-function renderTask() {
-  // let taskList = localStorage.getItem('tasks')
-  document.getElementById("taskList").innerHTML = " ";
-  taskList.forEach(function (taskObject) {
-    let task = document.createElement("div");
-    task.innerHTML = taskObject.taskTitle + " " + taskObject.dueDate;
-    let deleteButton = document.createElement("button");
-    deleteButton.innerHTML = "Delete";
-    deleteButton.style = "margin-left:20px";
-    task.appendChild(deleteButton);
-    deleteButton.onclick = deleteTask;
-    deleteButton.id = taskObject.id;
-    let taskShowKorarDiv = document.getElementById("taskList");
-    taskShowKorarDiv.appendChild(task);
-    // document.body.appendChild(task)
-  });
+function addTask() {
+    const newTaskTitle = document.getElementById("taskName");
+    const newTaskTitleValue = newTaskTitle.value.trim();
+    const datePicker = document.getElementById("dueDate");
+    const dueDate = datePicker.value;
+
+    if (newTaskTitleValue && dueDate) {
+        pushTask(newTaskTitleValue, dueDate);
+        newTaskTitle.value = "";
+        datePicker.value = "";
+        renderTask();
+    }
 }
+
+function renderTask() {
+    const taskListElement = document.getElementById("taskList");
+    taskListElement.innerHTML = "";
+
+    taskList.forEach(function (taskObject) {
+        const taskItem = document.createElement("div");
+        taskItem.className = `task-item ${taskObject.completed ? 'completed' : ''}`;
+
+        const taskInfo = document.createElement("div");
+        taskInfo.className = "task-info";
+
+        const taskName = document.createElement("div");
+        taskName.className = "task-name";
+        taskName.textContent = taskObject.taskTitle;
+
+        const taskDate = document.createElement("div");
+        taskDate.className = "task-date";
+        taskDate.textContent = `Due: ${taskObject.dueDate}`;
+
+        taskInfo.appendChild(taskName);
+        taskInfo.appendChild(taskDate);
+
+        const taskActions = document.createElement("div");
+        taskActions.className = "task-actions";
+
+        const completeButton = document.createElement("button");
+        completeButton.className = "complete-btn";
+        completeButton.textContent = taskObject.completed ? "Completed" : "Complete";
+        completeButton.setAttribute('data-task-id', taskObject.id);
+        completeButton.onclick = toggleComplete;
+
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "delete-btn";
+        deleteButton.textContent = "Delete";
+        deleteButton.setAttribute('data-task-id', taskObject.id);
+        deleteButton.onclick = deleteTask;
+
+        taskActions.appendChild(completeButton);
+        taskActions.appendChild(deleteButton);
+
+        taskItem.appendChild(taskInfo);
+        taskItem.appendChild(taskActions);
+
+        taskListElement.appendChild(taskItem);
+    });
+}
+
+// Initial render
+renderTask();
