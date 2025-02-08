@@ -1,0 +1,9 @@
+surge_link : https://tender-route.surge.sh/
+
+echo "# MVC__TaskManager" >> README.md
+git init
+git add .
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/fahiiiiii/MVC__TaskManager.git
+git push -u origin main
